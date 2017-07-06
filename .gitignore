@@ -45,3 +45,21 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.bak
+*.sty
+*.dem
+*.aux
+*.log
+*.ind
+llncs2e/readme.txt
+llncs2e/llncs.cls
+llncs2e/splncs03.bst
+*.dvi
+llncs2e/llncs.doc
+*.out
+*.bbl
+*.gz
+*.blg
+llncs2e/history.txt
+llncs2e/llncsdoc.pdf
+FlexMDE-2017.pdf
