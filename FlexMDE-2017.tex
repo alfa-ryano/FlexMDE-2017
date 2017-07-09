@@ -45,9 +45,9 @@
 \renewcommand{\thelstlisting}{\arabic{lstlisting}}
 \renewcommand{\labelitemi}{$\bullet$}
 
-\title{MODIO: Turning Models Inside Out}
+\title{Turning Models Inside Out}
 %
-\titlerunning{MODIO: Turning Models Inside Out}  % abbreviated title (for running head)
+\titlerunning{Turning Models Inside Out}  % abbreviated title (for running head)
 %                                     also used for the TOC unless
 %                                     \toctitle is used
 %
@@ -65,7 +65,7 @@
 \maketitle              % typeset the title of the contribution
 
 \begin{abstract}
-To reap the benefits of Model-Based Software Engineering in the context of large and complex systems, the ability to process large models in an incremental fashion as they evolve is essential. ``Incremental" means that the amount of time it takes to execute a model processing operation on a modified model should be proportional to the size of the change, as opposed to the size of the entire model. Current incremental model processing techniques either only deliver marginal performance benefits due to slow and imprecise model change detection capabilities. The aim of this research is to enable high-performance incremental model processing. Instead of persisting snapshots of the state of models, we propose turning models inside out and persisting their change history. The proposed approach has the potential to deliver step-change performance benefits in incremental model processing, which will enable a wide range of advantages and novel capabilities.
+To reap the benefits of Model-Based Software Engineering in the context of large and complex systems, the ability to process large models in an incremental fashion as they evolve is essential. ``Incremental" means that the amount of time it takes to execute a model processing operation on a modified model should be proportional to the size of the change, as opposed to the size of the entire model. Current incremental model processing techniques either only deliver marginal performance benefits due to slow and imprecise model change detection capabilities or are limited to a single-developer environment---which is not realistic for real-world software development projects. The aim of this research is to enable high-performance incremental model processing. Instead of persisting snapshots of the state of models, we propose turning models inside out and persisting their change history. The proposed approach has the potential to deliver step-change performance benefits in incremental model processing, which will enable a wide range of advantages and novel capabilities.
 \end{abstract}
 
 \section{Introduction}
@@ -260,7 +260,7 @@ Evaluation in the large will be conducted through appropriate case studies in co
 \label{Conclusions}
 Through turning models inside out and persisting their change history, this paper propose change-based model as an approach to enable high-performance incremental model processing in collaborative development settings. The proposed approach has the potential to deliver step-change performance benefits (e.g. faster model persistence, comparison, and merging) in incremental model processing, which has the potential to enable analytics of models (e.g. trace and replay model history, develop insight how modelling tools used). For future works, we will develop dedicated algorithms and data structures to reduce the cost of change-based model loading, a change-based format to persist models, change-compression operations to reduce the size of a model, a compact textual format to minimise space size, a hybrid model persistence format to incorporate change-based and state-based models, and support for existing modelling tools. Comparative evaluation will be conducted to assess the benefits and limitation of our approaches by comparing them to existing algorithms, tools, or baselines that they seek to improve.
 
-\subsubsection*{Acknowledgments.} This work is supported by European Research Council (ERC) Starting Grant 2016 and part of a doctoral programme funded by \emph{Lembaga Pengelola Dana Pendidikan Indonesia} (Indonesia Endowment Fund for Education).
+\subsubsection*{Acknowledgments.} This work is part of a doctoral scholarship managed by \emph{Lembaga Pengelola Dana Pendidikan Indonesia} (Indonesia Endowment Fund for Education).
 
 \bibliography{references} 
 \bibliographystyle{splncs}
