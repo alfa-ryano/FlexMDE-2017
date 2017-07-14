@@ -222,23 +222,21 @@ To illustrate the proposed approach, List. \ref{lst:xmimodel} shows a state-base
 
 Such a representation is particularly suitable for incremental model processing. For example, if the model-to-text transformation discussed above ``remembers" that in its previous invocation it had processed up to editing session \emph{s1} of the model, it can readily identify the changes that have been made to the model since then (i.e. in session \emph{s2} –- lines 15-20) instead of having to rediscover them through (expensive) state-based model differencing.
 
-
-
 \section{Prototype Implementation}
 \label{sec:prototype_implementation}
 We have implemented a prototype\footnote{The prototype is available under \url{https://github.com/epsilonlabs/emf-cbp}.} of the change-based model persistence format using the notification facilities provided by the Eclipse Modelling Framework. In our implementation we use a subclass of EMF's \emph{EContentAdapter} (\emph{ChangeEventAdapter}) to receive and record \emph{Notification} events produced by the framework for every model-element level change.
 
-Since not all change events are relevant to change-based persistence (e.g. EMF also produces change notifications when listeners/adapted are added/removed from the model), we have defined a set of event classes to represent events of interest. The event classes are depicted in Fig. \ref{fig:events} as subclasses of the \emph{ChangeEvent} abstract class.  %In Fig. \ref{events}, unlike other event classes,\emph{RegisterEPackageEvent} class has a reference to \emph{ChangeEventAdapater} class since the \emph{RegisterEPackageEvent} holds the information of \emph{EPackage}'s name (List. \ref{cbpmodel1}, line 3) required by the \emph{ChangeEventAdapter} to recreate a model in a de-serialisation process. 
-
-\begin{figure}[t!]
+\begin{figure}[th]
 \centering
-\includegraphics[scale=0.33]{events}
+\includegraphics[scale=0.32]{events}
 \caption{Event classes to represent changes of models.}
 %\dk{It would be useful to redraw the diagram so that important properties are visible (e.g. an AddToEReference event has an ``index'' and a ``value'') and also to discuss events - particularly those that may not immediately make sense to the reader (e.g. AddToResourceEvent, RegisterEPackageEvent)}
 \label{fig:events}
 \end{figure}
 
-The \emph{ChangeEvent} class has a mutli-valued \emph{values} attribute which can accommodate both single-valued (e.g. set/add) or mutli-valued events (e.g. addAll/removeAll). \emph{ChangeEvent} can also accommodate different types of values, such as \emph{EObject}s for \emph{EReferenceEvents}, and primitive values (e.g. Integer, String) for \emph{EAttributeEvents}. The \emph{ChangeEvent} class also has a position attribute to hold the  index of an EObject or a literal when they are added to a \emph{Resource}, \emph{EReference}, or \emph{EAttribute} with multiple values (Lst. \ref{lst:cbpmodel}, line 3, 6, 9, 12, 14, 17, 20). 
+Since not all change events are relevant to change-based persistence (e.g. EMF also produces change notifications when listeners/adapted are added/removed from the model), we have defined a set of event classes to represent events of interest. The event classes are depicted in Fig. \ref{fig:events} as subclasses of the \emph{ChangeEvent} abstract class.  %In Fig. \ref{events}, unlike other event classes,\emph{RegisterEPackageEvent} class has a reference to \emph{ChangeEventAdapater} class since the \emph{RegisterEPackageEvent} holds the information of \emph{EPackage}'s name (List. \ref{cbpmodel1}, line 3) required by the \emph{ChangeEventAdapter} to recreate a model in a de-serialisation process. 
+
+The \emph{ChangeEvent} class has a mutli-valued \emph{values} attribute which can accommodate both single-valued (e.g. set/add) or mutli-valued events (e.g. addAll/removeAll). \emph{ChangeEvent} can also accommodate different types of values, such as \emph{EObject}s for \emph{EReferenceEvents}, and primitive values (e.g. Integer, String) for \emph{EAttributeEvents}. The \emph{ChangeEvent} class also has a position attribute to hold the  index of an \emph{EObject} or a literal when they are added to a \emph{Resource}, \emph{EReference}, or \emph{EAttribute} with multiple values (Lst. \ref{lst:cbpmodel}, line 3, 6, 9, 12, 14, 17, 20). 
 
 %When an event happens, it can involve multiple instances of \emph{EObject}. In  Lst. \ref{lst:cbpmodel} line 21, when \emph{e4} is added as an employee that \emph{e2} manages (\emph{AddToEReferenceEvent}), the \emph{e4}, \emph{manages}, and \emph{e2} are set as the event's \emph{value}, \emph{eStructuralFeature} (in this case \emph{name}), and \emph{target} respectively. The \emph{eStructuralFeature} and \emph{target} attributes are defined in the \emph{EStructuralFeatureEvent} class, which are inherited by \emph{EReferenceEvent} and \emph{EAttributeEvent} and all their subclasses (Fig. \ref{fig:events}).  
 
@@ -246,9 +244,8 @@ The \emph{ChangeEvent} class has a mutli-valued \emph{values} attribute which ca
 
 Every time an \emph{EObject} is added to the model, a \emph{CreateEObjectEvent} and an \emph{AddToResourceEvent} are recorded (lines 2-3, 5-6, 8-9, and 16-17 in Lst. \ref{lst:cbpmodel}). When an EObject is deleted, or moved to a containment \emph{EReference} deeper in the model (Lst. \ref{lst:cbpmodel}, line 12, 14, 20), a \emph{RemoveFromResourceEvent} (Lst. \ref{lst:cbpmodel}, line 11, 13, 19) is recorded.
 
-The \emph{ChangeEventAdapter}, in its \emph{notifyChanged()} method, receives EMF change notifications and filters and transforms them into appropriate change events. As an example of how notifications are filtered and transformed, Listing \ref{lst:javacode} shows how we handle \emph{Notification.UNSET} events based on the type of the changed feature i.e. an \emph{UnsetEAttributeEvent} is instantiated if the feature of the notifier is an \emph{EAttribute}, or an \emph{UnsetEReferenceEvent}  is created if the notifier is an \emph{EReference}. The transformed instances are then stored into a list of events in \emph{ChangeEventAdapter} (\emph{changeEvents}) for persistence. 
+The \emph{ChangeEventAdapter} receives EMF change notifications in its \emph{notifyChanged()} method and filters and transforms them into appropriate change events. As an example of how notifications are filtered and transformed, Listing \ref{lst:javacode} shows how we handle \emph{Notification.UNSET} events based on the type of the changed feature i.e. an \emph{UnsetEAttributeEvent} is instantiated if the feature of the notifier is an \emph{EAttribute}, or an \emph{UnsetEReferenceEvent}  is created if the notifier is an \emph{EReference}. The transformed instances are then stored into a list of events in \emph{ChangeEventAdapter} (\emph{changeEvents}) for persistence. 
 
-\begin{figure}[th]
 \begin{lstlisting}[style=java,caption={Simplified Java code to handle notification events.},label=lst:javacode]
 public class ChangeEventAdapter extends EContentAdapter {
 ...
@@ -269,7 +266,6 @@ public void notifyChanged(Notification n) {
     } 
     ... // other events
 \end{lstlisting}	
-\end{figure}
 
 To integrate seamlessly with the EMF framework and to eventually support multiple concrete change-based serialisation formats (e.g. XML-formatted representation for readability and binary for performance/size), we have created the \emph{CBPResource} abstract class, that extends EMF's built-in \emph{ResourceImpl} class. The role of the abstract class is to encapsulate all change recording functionality while the role of its concrete subclasses is to implement serialisation and de-serialisation. For example, \emph{CBPXMLResourceImpl} persists changes in a line-based format where every change is serialised as a single-line XML document. In this way, when a model changes, we can append the new changes to the end of the model file without needing to serialise the entire model again. We have also implemented a \emph{CBPXMLResourceFactory} class that extends EMF's \emph{ResourceFactoryImpl}, as the factory class for change-based models. Figure \ref{fig:resources} shows the relationships between these classes.
 
@@ -278,7 +274,7 @@ To integrate seamlessly with the EMF framework and to eventually support multipl
 
 \begin{figure}[th]
 \centering
-\includegraphics[scale=0.33]{resources}
+\includegraphics[scale=0.32]{resources}
 \caption{Factory, resources, and ChangeEventAdapter classes.}
 %\dk{See previous comment on redrawing. In its current form the diagram can be interpreted as stating that a CBPXMLResourceFactory ``has a'' CBPXMLResourceImpl, which is incorrect.}
 \label{fig:resources}
