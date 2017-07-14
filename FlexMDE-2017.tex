@@ -73,15 +73,15 @@
 %                                     also used for the TOC unless
 %                                     \toctitle is used
 %
-\author{Dimitris Kolovos \and Fiona Polack \and Alfa Yohannis}
+\author{Alfa Yohannis \and Fiona Polack \and Dimitris Kolovos}
 %
-\authorrunning{Dimitris Kolovos et al.} % abbreviated author list (for running head)
+\authorrunning{Alfa Yohannis et al.} % abbreviated author list (for running head)
 %
 %%%% list of authors for the TOC (use if author list has to be modified)
 %\tocauthor{Dimitris Kolovos, Fiona Polack, Alfa Yohannis}
 %
 \institute{Department of Computer Science, University of York, United Kingdom\\
-\email{\{dimitris.kolovos, fiona.polack, ary506\}@york.ac.uk}}
+\email{\{ary506, fiona.polack, dimitris.kolovos\}@york.ac.uk}}
 
 \maketitle              % typeset the title of the contribution
 
@@ -193,7 +193,6 @@ In summary, incremental model processing currently delivers significant performa
 
 \begin{lstlisting}[style=xml,caption={Change-based representation of the model of Figure \ref{fig:modified_chart}.},label=lst:cbpmodel]
 <session id="s1"/>
-<register epackage="employee"/>
 <create eclass="Employee" epackage="employee" id="0"/>
 <add-to-resource position="0"><value eobject="0"/></add-to-resource>
 <set-eattribute name="name" target="0"><value literal="Roy"/></set-eattribute>
@@ -217,11 +216,11 @@ In summary, incremental model processing currently delivers significant performa
 
 \section{Proposed Approach}
 \label{sec:proposed_approach}
-The ambition of this research is to enable high-performance incremental model management in collaborative software development environments by challenging one of the fundamental assumptions of contemporary modelling frameworks and tools: As opposed to persisting snapshots of the state of models (which is what virtually all modelling tools and frameworks currently do), we propose turning models inside out and persisting their change history instead.
+The ambition of this research is to enable high-performance incremental model management in collaborative software development environments by challenging one of the fundamental assumptions of contemporary modelling frameworks and tools: as opposed to persisting snapshots of the state of models (which is what virtually all modelling tools and frameworks currently do), we propose turning models inside out and persisting their change history instead.
 
 To illustrate the proposed approach, List. \ref{lst:xmimodel} shows a state-based representation of the model of Fig. \ref{fig:modified_chart} in (simplified) XMI, and List. \ref{lst:cbpmodel} shows the proposed equivalent change-based representation of the same model. Instead of a snapshot of the state of the model, the representation of List. \ref{lst:cbpmodel} captures the complete sequence of change events (create/set/add/remove/delete) that were performed on the model since its creation, organised in editing sessions (2 editing sessions in the case of this model). Replaying these changes produces the same state as the one captured in List. \ref{lst:xmimodel}, so the proposed representation carries at least as much information as the state-based representation.
 
-Such a representation is particularly suitable for incremental model processing. For example, if the model-to-text transformation discussed above ``remembers" that in its previous invocation it had processed up to editing session \emph{s1} of the model, it can readily identify the changes that have been made to the model since then (i.e. in session \emph{s2} –- lines 16-21) instead of having to rediscover them through (expensive) state-based model differencing.
+Such a representation is particularly suitable for incremental model processing. For example, if the model-to-text transformation discussed above ``remembers" that in its previous invocation it had processed up to editing session \emph{s1} of the model, it can readily identify the changes that have been made to the model since then (i.e. in session \emph{s2} –- lines 15-20) instead of having to rediscover them through (expensive) state-based model differencing.
 
 
 
@@ -239,15 +238,15 @@ Since not all change events are relevant to change-based persistence (e.g. EMF a
 \label{fig:events}
 \end{figure}
 
-The \emph{ChangeEvent} class has the \emph{values} attribute which has a \emph{Collection} type with generic \emph{T}. This values attributes is used to holds one or more values (to produce model in Fig. \ref{fig:initial_chart}, \emph{e1} and \emph{e3} could be added at once as employees that \emph{e2} manages, rather than add them at a time) that are involved in an event. The generic \emph{T} is useful for the instances of  \emph{ChangeEvent} to handle different types of values, particularly \emph{EObject} type to represent instances that \emph{EReferenceEvents} and its subclasses refer, and Java \emph{Object} type to represent literal values (e.g. Integer, String) that \emph{EAttributeEvents} and its subclasses operate. The \emph{ChangeEvent} class also has a position attribute to hold the position index of an EObject's instance or a literal when they are added into \emph{Resource}, \emph{EReference}, or \emph{EAttribute} with multiple values (Lst. \ref{lst:cbpmodel}, line 4, 7, 10, 13, 15, 18, 21). 
+The \emph{ChangeEvent} class has a mutli-valued \emph{values} attribute which can accommodate both single-valued (e.g. set/add) or mutli-valued events (e.g. addAll/removeAll). \emph{ChangeEvent} can also accommodate different types of values, such as \emph{EObject}s for \emph{EReferenceEvents}, and primitive values (e.g. Integer, String) for \emph{EAttributeEvents}. The \emph{ChangeEvent} class also has a position attribute to hold the  index of an EObject or a literal when they are added to a \emph{Resource}, \emph{EReference}, or \emph{EAttribute} with multiple values (Lst. \ref{lst:cbpmodel}, line 3, 6, 9, 12, 14, 17, 20). 
 
-When and event happens, it can involve multiple instances of \emph{EObject}. In  Lst. \ref{lst:cbpmodel} line 21, when \emph{e4} is added as an employee that \emph{e2} manages (\emph{AddToEReferenceEvent} is executed), the \emph{e4}, \emph{manages}, and \emph{e2} are set as the event's \emph{value}, \emph{eStructuralFeature} (in this case \emph{name}), and \emph{target} respectively. The \emph{eStructuralFeature} and \emph{target} attributes are defined in the \emph{EStructuralFeatureEvent} class, which are inherited by \emph{EReferenceEvent} and \emph{EAttributeEvent} and all their subclasses (Fig. \ref{fig:events}).  
+%When an event happens, it can involve multiple instances of \emph{EObject}. In  Lst. \ref{lst:cbpmodel} line 21, when \emph{e4} is added as an employee that \emph{e2} manages (\emph{AddToEReferenceEvent}), the \emph{e4}, \emph{manages}, and \emph{e2} are set as the event's \emph{value}, \emph{eStructuralFeature} (in this case \emph{name}), and \emph{target} respectively. The \emph{eStructuralFeature} and \emph{target} attributes are defined in the \emph{EStructuralFeatureEvent} class, which are inherited by \emph{EReferenceEvent} and \emph{EAttributeEvent} and all their subclasses (Fig. \ref{fig:events}).  
 
-The \emph{RegisterEPackageEvent} class is responsible to capture an event when the EMF's \emph{EPackage} of a model is registered to the \emph{ChangeEventAdapter}'s \emph{ePackages} attribute (Fig. \ref{fig:events} and Lst. \ref{lst:cbpmodel}, line 2). The information of the \emph{EPackage} is required in further model creation (e.g. create model from XML-formatted representation). The \emph{ChangeEventAdapter}'s is designed to handle multiple packages of models.
+% The \emph{RegisterEPackageEvent} class is responsible to capture an event when the EMF's \emph{EPackage} of a model is registered to the \emph{ChangeEventAdapter}'s \emph{ePackages} attribute (Fig. \ref{fig:events} and Lst. \ref{lst:cbpmodel}, line 2). The information of the \emph{EPackage} is required in further model creation (e.g. create model from XML-formatted representation). The \emph{ChangeEventAdapter}'s is designed to handle multiple packages of models.
 
-Every time an EMF's \emph{EObject} instance is created, by default the instance is always added into a model's resource -- a default container for instances that have just created. This event is represented by the \emph{AddToResourceEvent} class. In the form of change-based XML-formatted representation, line 3, 6, 9, and 17 in Lst. \ref{lst:cbpmodel} represent this event. When the \emph{EObject} instance is deleted, or added or assigned to an EMF's \emph{EReference} object (Lst. \ref{lst:cbpmodel}, line 13, 15, 21), the event is preceded by an event that removes the instance from the resource (Lst. \ref{lst:cbpmodel}, line 12, 14, 20). This removal event is represented by the \emph{RemoveFromResourceEvent} class.
+Every time an \emph{EObject} is added to the model, a \emph{CreateEObjectEvent} and an \emph{AddToResourceEvent} are recorded (lines 2-3, 5-6, 8-9, and 16-17 in Lst. \ref{lst:cbpmodel}). When an EObject is deleted, or moved to a containment \emph{EReference} deeper in the model (Lst. \ref{lst:cbpmodel}, line 12, 14, 20), a \emph{RemoveFromResourceEvent} (Lst. \ref{lst:cbpmodel}, line 11, 13, 19) is recorded.
 
-The \emph{ChangeEventAdapter}, in its \emph{notifyChanged()} method, receives change notifications and filters and transforms them into appropriate change events. As an example of how notifications are filtered and transformed, Listing \ref{lst:javacode} shows how we handle \emph{Notification.UNSET} events based on the type of the changed feature i.e. an \emph{UnsetEAttributeEvent} is instantiated if the feature of the notifier is an \emph{EAttribute}, or an \emph{UnsetEReferenceEvent}  is created if the notifier is an \emph{EReference}. The transformed instances are then stored into a list of events for persistence. 
+The \emph{ChangeEventAdapter}, in its \emph{notifyChanged()} method, receives EMF change notifications and filters and transforms them into appropriate change events. As an example of how notifications are filtered and transformed, Listing \ref{lst:javacode} shows how we handle \emph{Notification.UNSET} events based on the type of the changed feature i.e. an \emph{UnsetEAttributeEvent} is instantiated if the feature of the notifier is an \emph{EAttribute}, or an \emph{UnsetEReferenceEvent}  is created if the notifier is an \emph{EReference}. The transformed instances are then stored into a list of events in \emph{ChangeEventAdapter} (\emph{changeEvents}) for persistence. 
 
 \begin{figure}[th]
 \begin{lstlisting}[style=java,caption={Simplified Java code to handle notification events.},label=lst:javacode]
@@ -272,7 +271,7 @@ public void notifyChanged(Notification n) {
 \end{lstlisting}	
 \end{figure}
 
-To integrate seamlessly with the EMF framework and to provide multiple concrete change-based serialisation formats (e.g. XML-formatted representation for readability and binary for performance/size), we have created the \emph{CBPResource} abstract class, that extends EMF's built-in \emph{ResourceImpl} class. The role of the abstract class is to encapsulate all change recording functionality while the role of its concrete subclasses is to implement serialisation and de-serialisation. For example, \emph{CBPXMLResourceImpl} persists changes in a line-based format where every change is serialised as a single-line XML document. In this way, when a model changes, we can append the new changes to the end of the model file without needing to serialise the entire model again. This is expected to significantly reduce the time required to save changes made to large models. We have also implemented a \emph{CBPXMLResourceFactory} class that extends EMF's \emph{ResourceFactoryImpl}, as the factory class for change-based models. Figure \ref{fig:resources} shows the relationships between these classes.
+To integrate seamlessly with the EMF framework and to eventually support multiple concrete change-based serialisation formats (e.g. XML-formatted representation for readability and binary for performance/size), we have created the \emph{CBPResource} abstract class, that extends EMF's built-in \emph{ResourceImpl} class. The role of the abstract class is to encapsulate all change recording functionality while the role of its concrete subclasses is to implement serialisation and de-serialisation. For example, \emph{CBPXMLResourceImpl} persists changes in a line-based format where every change is serialised as a single-line XML document. In this way, when a model changes, we can append the new changes to the end of the model file without needing to serialise the entire model again. We have also implemented a \emph{CBPXMLResourceFactory} class that extends EMF's \emph{ResourceFactoryImpl}, as the factory class for change-based models. Figure \ref{fig:resources} shows the relationships between these classes.
 
 %The \emph{CBPXMLResourceImpl} uses an instance of \emph{ChangeEventAdapater} class to obtain a list of change events. The relationships of these classes are depicted in Fig. \ref{fig:resources}. By overriding \emph{CBPResource}'s \emph{doSave} and  \emph{doLoad} methods, we can perform serialization of the event list into an XML-formatted file and load it back again later. The representation is not a valid, complete XML format since it has no root node. Instead, it is a list of XML-formatted lines so that changes can be saved by appending new lines to the file to improve performance.
 
