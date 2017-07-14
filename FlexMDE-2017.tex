@@ -78,8 +78,7 @@
 \authorrunning{Dimitris Kolovos et al.} % abbreviated author list (for running head)
 %
 %%%% list of authors for the TOC (use if author list has to be modified)
-%\tocauthor{Ivar Ekeland, Roger Temam, Jeffrey Dean, David Grove,
-%Craig Chambers, Kim B. Bruce, and Elisa Bertino}
+%\tocauthor{Dimitris Kolovos, Fiona Polack, Alfa Yohannis}
 %
 \institute{Department of Computer Science, University of York, United Kingdom\\
 \email{\{dimitris.kolovos, fiona.polack, ary506\}@york.ac.uk}}
@@ -100,39 +99,39 @@ To reap the benefits of Model-Based Software Engineering in the context of large
 
 The research introduced in this paper aims to enable high-performance incremental model processing through change-based model persistence. That is, instead of persisting snapshots of the state of models, we propose turning models inside out and persisting their change history. The proposed approach has the potential to deliver step-change performance benefits in incremental model processing, which will enable a wide range of advantages and novel capabilities.
 
-The rest of the paper is structured as follows. Section \ref{The Key-Challenge of Incrementality} reviews the key-challenge of incrementality in MBSE. Section \ref{Identifying Changes in Models} provides an overview of existing approaches for identifying changes in models. Section \ref{Proposed Approach} overviews our proposed approach and Section \ref{Prototype Implementation} discusses our prototype implementation on top of the Eclipse Modelling Framework. The potential benefits and novel capabilities, as well as the challenges of change-based model persistence, are presented in Sect. \ref{Benefits and Novel Capabilities} and Sect. \ref{Challenges and Future Works} respectively. Section \ref{Evaluation Strategy} presents our evaluation strategy and Sect. \ref{Conclusions} concludes this paper.
+The rest of the paper is structured as follows. Section \ref{sec:the_key_challenge_of_ _incrementality} reviews the key-challenge of incrementality in MBSE. Section \ref{sec:identifying_changes_in models} provides an overview of existing approaches for identifying changes in models. Section \ref{sec:proposed_approach} overviews our proposed approach and Section \ref{sec:prototype_implementation} discusses our prototype implementation on top of the Eclipse Modelling Framework. The potential benefits and novel capabilities, as well as the challenges of change-based model persistence, are presented in Sect. \ref{sec:benefits_and_novel_capabilities} and Sect. \ref{sec:challenges_and_future_works} respectively. Section \ref{sec:evaluation_strategy} presents our evaluation strategy and Sect. \ref{sec:conclusions} concludes this paper.
 
 \section{The Key-Challenge of Incrementality}
-\label{The Key-Challenge of Incrementality}
-\dk{See \url{https://en.wikibooks.org/wiki/LaTeX/Labels_and_Cross-referencing} for naming conventions for LaTeX labels}
-To illustrate the concept of incrementality, a contrived running example is used where after every modification to an organisational chart model (see Fig. \ref{image1}), the model needs to be:
+\label{sec:the_key_challenge_of_ _incrementality}
+%\dk{See \url{https://en.wikibooks.org/wiki/LaTeX/Labels_and_Cross-referencing} for naming conventions for LaTeX labels}
+To illustrate the concept of incrementality, a contrived running example is used where after every modification to an organisational chart model (see Fig. \ref{fig:initial_chart}), the model needs to be:
 
 \begin{itemize}
 \item Validated against a domain-specific constraint (that no employee directly manages more than 7 other employees).
 \item Transformed into a number of employee reports (plain text files, one for each employee) through a model-to-text transformation. Each report should contain the name of the employee, and the names of her direct subordinates.
 \end{itemize}
 
-Figures \ref{image1} and \ref{image2} are two consecutive versions of a sample organisational chart model. When the validation constraint is evaluated against the first version of the model (Fig. \ref{image1}), it verifies that all three employees manage fewer than 7 other employees, and the model-to-text transformation then produces three text files that correspond to the employees in the model. In the sequel, in Fig. \ref{image2}, the model is updated to reflect that a new employee has been hired (Richmond) under the management of Jen. 
+Figures \ref{fig:initial_chart} and \ref{fig:modified_chart} are two consecutive versions of a sample organisational chart model. When the validation constraint is evaluated against the first version of the model (Fig. \ref{fig:initial_chart}), it verifies that all three employees manage fewer than 7 other employees, and the model-to-text transformation then produces three text files that correspond to the employees in the model. In the sequel, in Fig. \ref{fig:modified_chart}, the model is updated to reflect that a new employee has been hired (Richmond) under the management of Jen. 
 
 \begin{figure}[b!]
 \centering
-\includegraphics[width=\linewidth]{image1}
+\includegraphics[width=\linewidth]{initial_chart}
 \caption{Initial version of the organisational chart model.}
-\label{image1}
+\label{fig:initial_chart}
 \end{figure}
 
 \begin{figure}[b!]
 \centering
-\includegraphics[width=\linewidth]{image2}
-\caption{Modified version of the organisational chart model of Fig. \ref{image1}.}
-\label{image2}
+\includegraphics[width=\linewidth]{modified_chart}
+\caption{Modified version of the organisational chart model of Fig. \ref{fig:initial_chart}.}
+\label{fig:modified_chart}
 \end{figure}
 
-A non-incremental model validation engine would treat the model of Fig. \ref{image2} as if it was a new model and would evaluate the constraint above against every employee in the model. An incremental model validation engine, on the other hand, would identify that the previously established satisfaction of the constraint for employees Moss and Roy cannot have been possibly compromised by the changes made, and would only re-evaluate the constraint for Jen and Richmond instead. 
+A non-incremental model validation engine would treat the model of Fig. \ref{fig:modified_chart} as if it was a new model and would evaluate the constraint above against every employee in the model. An incremental model validation engine, on the other hand, would identify that the previously established satisfaction of the constraint for employees Moss and Roy cannot have been possibly compromised by the changes made, and would only re-evaluate the constraint for Jen and Richmond instead. 
 
 Similarly, a non-incremental model-to-text transformation would generate and overwrite all employee reports from scratch. On the contrary, an incremental model-to-text transformation, would identify that it only needs to generate a new report for the new employee (Richmond), and to recompute and overwrite the contents of Jen's report (as she is now managing an additional employee)---but not the reports of Moss or Roy, as these cannot have been affected by the changes made to the model.
 
-While the overhead of executing transformations and validation constraints on small models like the one in Fig. \ref{image2} is negligible, non-incremental execution can become a significant bottleneck for large evolving models. As stressed in Selic's seminal work \cite{selic2003pragmatics}, with reference to model-to-text transformation, ``... \emph{this is particularly true in the latter phases of the development cycle when programmers make many small changes as they fine-tune the system. To keep this overhead low, it is crucial for the code generators to have sophisticated change impact analysis capabilities that minimize the amount of code regeneration}".
+While the overhead of executing transformations and validation constraints on small models like the one in Fig. \ref{fig:modified_chart} is negligible, non-incremental execution can become a significant bottleneck for large evolving models. As stressed in Selic's seminal work \cite{selic2003pragmatics}, with reference to model-to-text transformation, ``... \emph{this is particularly true in the latter phases of the development cycle when programmers make many small changes as they fine-tune the system. To keep this overhead low, it is crucial for the code generators to have sophisticated change impact analysis capabilities that minimize the amount of code regeneration}".
 
 As demonstrated by the pioneering work of Egyed \cite{egyed2011automatically}, to achieve incremental re-execution of (deterministic) queries on structured models, an execution engine needs to:
 
@@ -142,14 +141,14 @@ As demonstrated by the pioneering work of Egyed \cite{egyed2011automatically}, t
 \item Combine the information collected in the steps above to identify the subset of (potentially) affected rules/queries/templates that need to be re-executed.
 \end{enumerate}
 
-To illustrate this, we use an OCL implementation of the domain-specific constraint in List. \ref{constraint}.
+To illustrate this, we use an OCL implementation of the domain-specific constraint in List. \ref{lst:constraint}.
 
-\begin{lstlisting}[style=ocl,caption={OCL constraint requiring that no employee directly manages more than 7 other employees.},label=constraint]
+\begin{lstlisting}[style=ocl,caption={OCL constraint requiring that no employee directly manages more than 7 other employees.},label=lst:constraint]
 context Employee
 inv NoMoreThan7: self.manages->size() <= 7
 \end{lstlisting}
 
-During the initial evaluation of the constraint on the model of Fig. \ref{image1}, an incremental OCL engine would compute the property access trace displayed in Table \ref{table1} as a side-product. Now, when the model is updated (Fig. \ref{image2}), the execution engine can identify that:
+During the initial evaluation of the constraint on the model of Fig. \ref{fig:initial_chart}, an incremental OCL engine would compute the property access trace displayed in Table \ref{tab:property_access_trace} as a side-product. Now, when the model is updated (Fig. \ref{fig:modified_chart}), the execution engine can identify that:
 
 \begin{itemize}
 \item There is new element in the model (\emph{e4} - Richmond) for which the constraint has not been evaluated;
@@ -158,7 +157,7 @@ During the initial evaluation of the constraint on the model of Fig. \ref{image1
 
 \begin{table}[h!]
 \centering
-\caption{Property-access trace of the evaluation of the constraint in List. \ref{constraint} on the model of Fig. \ref{image1}.}
+\caption{Property-access trace of the evaluation of the constraint in List. \ref{lst:constraint} on the model of Fig. \ref{fig:initial_chart}.}
 \begin{tabular}{p{4.8cm} p{2.1cm} p{2cm} p{2.1cm}}
 \hline 
 \textbf{Constraint} & \textbf{Context} & \textbf{Accessed Element} & \textbf{Accessed Property} \\ 
@@ -168,13 +167,13 @@ During the initial evaluation of the constraint on the model of Fig. \ref{image1
 \emph{Employee.NoMoreThan7}  & \emph{e3} & \emph{e3} & \emph{manages} \\ 
 \hline 
 \end{tabular} 
-\label{table1}
+\label{tab:property_access_trace}
 \end{table}
 
 Egyed has shown that the property-access recording approach is applicable to queries of arbitrary complexity, as long as they are deterministic. Moreover, work derived from Egyed's approach has shown that variants of this approach can be used to achieve incrementality in a wide range of model processing operations, including model-to-model transformation \cite{jouault2010towards}, model-to-text transformation \cite{ogunyomi2015property}, model validation, and pattern matching \cite{rath2012derived}---as long as changes to models can be precisely identified (step 2 in the list above).
 
 \section{Identifying Changes in Models}
-\label{Identifying Changes in Models}
+\label{sec:identifying_changes_in models}
 There are two approaches in the literature for identifying changes in models in order to enable incremental re-execution of model processing operations.
 
 \textbf{Notifications}. In this approach, the incremental execution engine needs to hook into the notification facilities provided by the modelling tool through which the developer edits the model, so that the engine can directly receive notifications as soon as changes happen (e.g. a new employee (\emph{e4}) has been added, the name property of employee \emph{e4} has been changed to ``Richmond"). This is an approach taken by the IncQuery incremental pattern matching framework \cite{rath2012derived} and the ReactiveATL incremental model-to-model transformation engine \cite{ogunyomi2015property}. The main advantage of this approach is that precise and fine-grained change notifications are provided for free by the modelling tool (and thus do not need to be computed by the execution engine---which as discussed below can be expensive and inefficient). On the downside, this approach is a poor fit for collaborative development settings where modelling and automated model processing activities are performed by different members of the team.
@@ -184,14 +183,14 @@ There are two approaches in the literature for identifying changes in models in 
 In summary, incremental model processing currently delivers significant performance benefits only in a single-developer environment where the modeller is also responsible for performing all the (incremental) model processing operations. As a result, in collaborative development environments, developers need to either forgo incremental model processing altogether or to work around this limitation by manually steering model processing programs to process only subsets of their models, which is cumbersome and error prone.
 
 \section{Proposed Approach}
-\label{Proposed Approach}
+\label{sec:proposed_approach}
 The ambition of this research is to enable high-performance incremental model management in collaborative software development environments by challenging one of the fundamental assumptions of contemporary modelling frameworks and tools: As opposed to persisting snapshots of the state of models (which is what virtually all modelling tools and frameworks currently do), we propose turning models inside out and persisting their change history instead.
 
-To illustrate the proposed approach, List. \ref{xmimodel} shows a state-based representation of the model of Fig. \ref{image2} in (simplified) XMI, and List. \ref{cbpmodel1} shows the proposed equivalent change-based representation of the same model. Instead of a snapshot of the state of the model, the representation of List. \ref{cbpmodel1} captures the complete sequence of change events (create/set/add/remove/delete) that were performed on the model since its creation, organised in editing sessions (2 editing sessions in the case of this model). Replaying these changes produces the same state as the one captured in List. \ref{xmimodel}, so the proposed representation carries at least as much information as the state-based representation.
+To illustrate the proposed approach, List. \ref{lst:xmimodel} shows a state-based representation of the model of Fig. \ref{fig:modified_chart} in (simplified) XMI, and List. \ref{lst:cbpmodel} shows the proposed equivalent change-based representation of the same model. Instead of a snapshot of the state of the model, the representation of List. \ref{lst:cbpmodel} captures the complete sequence of change events (create/set/add/remove/delete) that were performed on the model since its creation, organised in editing sessions (2 editing sessions in the case of this model). Replaying these changes produces the same state as the one captured in List. \ref{lst:xmimodel}, so the proposed representation carries at least as much information as the state-based representation.
 
 The keen-eyed reader will observe that such a representation is particularly suitable for incremental model processing. For example, if the model-to-text transformation discussed above ``remembers" that in its previous invocation it had processed up to editing session \emph{s1} of the model, it can readily identify the changes that have been made to the model since then (i.e. in session \emph{s2} –- lines 16-21) instead of having to rediscover them through (expensive) state-based model differencing.
 
-\begin{lstlisting}[style=xmi,caption={State-based representation of the model of Figure \ref{image2} in (simplified) XMI.},label=xmimodel]
+\begin{lstlisting}[style=xmi,caption={State-based representation of the model of Figure \ref{fig:modified_chart} in (simplified) XMI.},label=lst:xmimodel]
 <Employee xmi:id="e2" name="Jen">
   <manages xmi:id="e1" name="Roy"/>
   <manages xmi:id="e3" name="Moss"/>
@@ -199,7 +198,7 @@ The keen-eyed reader will observe that such a representation is particularly sui
 </Employee>
 \end{lstlisting}
 
-\begin{lstlisting}[style=xml,caption={Change-based representation of the model of Figure \ref{image2}.},label=cbpmodel1]
+\begin{lstlisting}[style=xml,caption={Change-based representation of the model of Figure \ref{fig:modified_chart}.},label=lst:cbpmodel]
 <session id="s1"/>
 <register epackage="employee"/>
 <create eclass="Employee" epackage="employee" id="0"/>
@@ -224,22 +223,31 @@ The keen-eyed reader will observe that such a representation is particularly sui
 \end{lstlisting}
 
 \section{Prototype Implementation}
-\label{Prototype Implementation}
-We have implemented a prototype of the change-based model persistence format using the notification facilities provided by the Eclipse Modelling Framework. In our implementation we use a subclass of EMF's \emph{EContentAdapter} (\emph{ChangeEventAdapter}) to receive and record \emph{Notification} events produced by the framework for every model-element level change.
+\label{sec:prototype_implementation}
+We have implemented a prototype\footnote{The prototype is available under \url{https://github.com/epsilonlabs/emf-cbp}.} of the change-based model persistence format using the notification facilities provided by the Eclipse Modelling Framework. In our implementation we use a subclass of EMF's \emph{EContentAdapter} (\emph{ChangeEventAdapter}) to receive and record \emph{Notification} events produced by the framework for every model-element level change.
 
-Since not all change events are relevant to change-based persistence (e.g. EMF also produces change notifications when listeners/adapted are added/removed from the model), we have defined a set of event classes to represent events of interest. The event classes are depicted in Fig. \ref{events} as subclasses of the \emph{ChangeEvent} abstract class.  %In Fig. \ref{events}, unlike other event classes,\emph{RegisterEPackageEvent} class has a reference to \emph{ChangeEventAdapater} class since the \emph{RegisterEPackageEvent} holds the information of \emph{EPackage}'s name (List. \ref{cbpmodel1}, line 3) required by the \emph{ChangeEventAdapter} to recreate a model in a de-serialisation process. 
-
-\emph{ChangeEventAdapter} receives change notifications in its \emph{notifyChanged()} method and filters and transforms them into appropriate change events. As an example of how notifications are filtered and transformed, Listing \ref{javacode} shows how we handle \emph{Notification.UNSET} events based on the type of the changed feature i.e. an \emph{UnsetEAttributeEvent} is instantiated if the feature of the notifier is an \emph{EAttribute}, or an \emph{UnsetEReferenceEvent}  is created if the notifier is an \emph{EReference}. The transformed instances are then stored into a list of events for persistence. 
+Since not all change events are relevant to change-based persistence (e.g. EMF also produces change notifications when listeners/adapted are added/removed from the model), we have defined a set of event classes to represent events of interest. The event classes are depicted in Fig. \ref{fig:events} as subclasses of the \emph{ChangeEvent} abstract class.  %In Fig. \ref{events}, unlike other event classes,\emph{RegisterEPackageEvent} class has a reference to \emph{ChangeEventAdapater} class since the \emph{RegisterEPackageEvent} holds the information of \emph{EPackage}'s name (List. \ref{cbpmodel1}, line 3) required by the \emph{ChangeEventAdapter} to recreate a model in a de-serialisation process. 
 
 \begin{figure}[t!]
 \centering
-\includegraphics[width=\linewidth]{events}
-\caption{Event classes to represent changes of models. \dk{It would be useful to redraw the diagram so that important properties are visible (e.g. an AddToEReference event has an ``index'' and a ``value'') and also to discuss events - particularly those that may not immediately make sense to the reader (e.g. AddToResourceEvent, RegisterEPackageEvent)}}
-\label{events}
+\includegraphics[scale=0.33]{events}
+\caption{Event classes to represent changes of models.}
+%\dk{It would be useful to redraw the diagram so that important properties are visible (e.g. an AddToEReference event has an ``index'' and a ``value'') and also to discuss events - particularly those that may not immediately make sense to the reader (e.g. AddToResourceEvent, RegisterEPackageEvent)}
+\label{fig:events}
 \end{figure}
 
-\begin{figure}[t!]
-\begin{lstlisting}[style=java,caption={Simplified Java code to handle notification events.},label=javacode]
+The \emph{ChangeEvent} class has the \emph{values} attribute which has a type of a  \emph{Collection} with generic type \emph{T}. This values attributes is used to holds one or more values (to produce model in Fig. \ref{fig:initial_chart}, \emph{e1} and \emph{e3} could be added at once as employees that \emph{e2} manages, rather than add them at a time) that are involved in an event. The generic type \emph{T} is useful for the instances of  \emph{ChangeEvent} to handle different type of values, particularly \emph{EObject} type to represent instances that \emph{EReferenceEvents} and its subclasses refer, and Java \emph{Object} type to represent literal values (e.g. Integer, String) that \emph{EAttributeEvents} and its subclasses operate. The \emph{ChangeEvent} class also has a position attribute to hold the position index of an EObject's instance or a literal when they are added into \emph{Resource}, \emph{EReference}, or \emph{EAttribute} with multiple values (Lst. \ref{lst:cbpmodel}, line 4, 7, 10, 13, 15, 18, 21). 
+
+%When and event happens, it can involve multiple instances of \emph{EObject}. In  Lst. \ref{lst:cbpmodel} line 21, when \emph{e4} is added as an employee that \emph{e2} manages (\emph{AddToEReferenceEvent} is executed), the \emph{e4}, \emph{manages}, and \emph{e2} are set as the event's \emph{value}, \emph{eStructuralFeature} (in this case \emph{name}), and \emph{target} respectively. The \emph{eStructuralFeature} and \emph{target} attributes are defined in the \emph{EStructuralFeatureEvent} class, which are inherited by \emph{EReferenceEvent} and \emph{EAttributeEvent} and all their subclasses (Fig. \ref{fig:events}).  
+
+The \emph{RegisterEPackageEvent} class is responsible to capture an event when the EMF's \emph{EPackage} of a model is registered to the \emph{ChangeEventAdapter}'s \emph{ePackages} attribute (Fig. \ref{fig:events} and Lst. \ref{lst:cbpmodel}, line 2). The information of the \emph{EPackage} is required in further model creation )(e.g. create model from XML-formatted representation). The \emph{ChangeEventAdapter}'s is designed to handle multiple packages of models.
+
+Every time an EMF's \emph{EObject} instance is created, by default the instance is always added into a model's resource -- a default container for instances that have just created. This event is represented by the \emph{AddToResourceEvent} class. In the form of change-based XML-formatted representation, line 3, 6, 9, and 17 in Lst. \ref{lst:cbpmodel} represent this event. When the \emph{EObject} instance is deleted, or added or assigned to an EMF's \emph{EReference} object (Lst. \ref{lst:cbpmodel}, line 13, 15, 21), the event is preceded by an event that removes the instance from the resource (Lst. \ref{lst:cbpmodel}, line 12, 14, 20). This removal event is represented by the \emph{RemoveFromResourceEvent} class.
+
+\emph{ChangeEventAdapter}, in its \emph{notifyChanged()} method, receives change notifications and filters and transforms them into appropriate change events. As an example of how notifications are filtered and transformed, Listing \ref{lst:javacode} shows how we handle \emph{Notification.UNSET} events based on the type of the changed feature i.e. an \emph{UnsetEAttributeEvent} is instantiated if the feature of the notifier is an \emph{EAttribute}, or an \emph{UnsetEReferenceEvent}  is created if the notifier is an \emph{EReference}. The transformed instances are then stored into a list of events for persistence. 
+
+\begin{figure}[th]
+\begin{lstlisting}[style=java,caption={Simplified Java code to handle notification events.},label=lst:javacode]
 public class ChangeEventAdapter extends EContentAdapter {
 ...
 @override
@@ -261,20 +269,21 @@ public void notifyChanged(Notification n) {
 \end{lstlisting}	
 \end{figure}
 
-To integrate seamlessly with the EMF framework and to provide multiple concrete change-based serialisation formats (e.g. XML-formatted representation for readability and binary for performance/size), we have created the \emph{CBPResource} abstract class, that extends EMF's built-in \emph{ResourceImpl} class. The role of the abstract class is to encapsulate all change recording functionality while the role of its concrete subclasses is to implement serialisation and de-serialisation. For example, \emph{CBPXMLResourceImpl} persists changes in a line-based format where every change is serialised as a single-line XML document. In this way, when a model changes, we can append the new changes to the end of the model file without needing to serialise the entire model again. This is expected to significantly reduce the time required to save changes made to large models. We have also implemented a \emph{CBPXMLResourceFactory} class that extends EMF's \emph{ResourceFactoryImpl}, as the factory class for change-based models. The prototype is available under \url{https://github.com/epsilonlabs/emf-cbp}.
+To integrate seamlessly with the EMF framework and to provide multiple concrete change-based serialisation formats (e.g. XML-formatted representation for readability and binary for performance/size), we have created the \emph{CBPResource} abstract class, that extends EMF's built-in \emph{ResourceImpl} class. The role of the abstract class is to encapsulate all change recording functionality while the role of its concrete subclasses is to implement serialisation and de-serialisation. For example, \emph{CBPXMLResourceImpl} persists changes in a line-based format where every change is serialised as a single-line XML document. In this way, when a model changes, we can append the new changes to the end of the model file without needing to serialise the entire model again. This is expected to significantly reduce the time required to save changes made to large models. We have also implemented a \emph{CBPXMLResourceFactory} class that extends EMF's \emph{ResourceFactoryImpl}, as the factory class for change-based models. Figure \ref{fig:resources} shows the relationships between these classes.
 
-%The \emph{CBPXMLResourceImpl} uses an instance of \emph{ChangeEventAdapater} class to obtain a list of change events. The relationships of these classes are depicted in Fig. \ref{resources}. By overriding \emph{CBPResource}'s \emph{doSave} and  \emph{doLoad} methods, we can perform serialization of the event list into an XML-formatted file and load it back again later. The representation is not a valid, complete XML format since it has no root node. Instead, it is a list of XML-formatted lines so that changes can be saved by appending new lines to the file to improve performance.
+%The \emph{CBPXMLResourceImpl} uses an instance of \emph{ChangeEventAdapater} class to obtain a list of change events. The relationships of these classes are depicted in Fig. \ref{fig:resources}. By overriding \emph{CBPResource}'s \emph{doSave} and  \emph{doLoad} methods, we can perform serialization of the event list into an XML-formatted file and load it back again later. The representation is not a valid, complete XML format since it has no root node. Instead, it is a list of XML-formatted lines so that changes can be saved by appending new lines to the file to improve performance.
 
 
 \begin{figure}[th]
 \centering
-\includegraphics[width=6.5cm]{resources}
-\caption{Factory, resources, and ChangeEventAdapter classes. \dk{See previous comment on redrawing. In its current form the diagram can be interpreted as stating that a CBPXMLResourceFactory ``has a'' CBPXMLResourceImpl, which is incorrect.}}
-\label{resources}
+\includegraphics[scale=0.33]{resources}
+\caption{Factory, resources, and ChangeEventAdapter classes.}
+%\dk{See previous comment on redrawing. In its current form the diagram can be interpreted as stating that a CBPXMLResourceFactory ``has a'' CBPXMLResourceImpl, which is incorrect.}
+\label{fig:resources}
 \end{figure}
 
 \section{Benefits and Novel Capabilities}
-\label{Benefits and Novel Capabilities}
+\label{sec:benefits_and_novel_capabilities}
 Beyond facilitating incremental processing, the proposed representation also has the potential to deliver a wide range of benefits and novel capabilities, compared to the currently prevalent state-based representations, some of which are discussed below.
 
 \begin{itemize}
@@ -286,7 +295,7 @@ Beyond facilitating incremental processing, the proposed representation also has
 \end{itemize}
 
 \section{Challenges and Future Work}
-\label{Challenges and Future Works}
+\label{sec:challenges_and_future_works}
 The proposed approach also comes with a number of challenges that this research will need to overcome.
 
 \textbf{Loading Overhead}. While, as discussed above, persisting changes to large models is expected to be much faster and resource-efficient compared to state-based approaches, loading models into memory by naively replaying the entire change history is expected to have a significant overhead. To address this challenge, we will develop dedicated algorithms and data structures that will reduce the cost of change-based model loading (e.g. by recording and ignoring events -- events that are later overridden or cancelled out by other events). 
@@ -294,11 +303,11 @@ The proposed approach also comes with a number of challenges that this research 
 \textbf{Fast-Growing Model Files}. Persisting models in a change-based format means that model files will keep growing in size during their evolution significantly faster than their state-based counterparts. To address this challenge, (1) we will propose sound change-compression operations (e.g. remove older/unused information) that can be used to reduce the size of a model in a controlled way. (2) We will develop a compact textual format that will minimise the amount of space required to record a change (a textual line-separated format is desirable to maintain compatibility with file-based version control systems). (3) We will propose a hybrid model persistence format which will be able to incorporate both change-based and state-based information. 
 
 \section{Evaluation Strategy}
-\label{Evaluation Strategy}
+\label{sec:evaluation_strategy}
 The findings of the research will be evaluated in the small in the context of the tasks in which they will be developed, and in the large through industrial case studies. For the first type of evaluation (in the small), where there are existing approaches that the algorithms and tools developed in this research seek to outperform (e.g. change-based incremental validation vs. state-based incremental validation), comparative evaluation will be conducted to assess the benefits and limitations of our approaches. For algorithms and tools that have no direct competitors in the literature, their contributions will be assessed in comparison to the baseline they seek to improve (e.g. in this case, persisting full change histories). Evaluation in the large will be conducted through appropriate case studies in collaboration with industrial peers.
 
 \section{Conclusions}
-\label{Conclusions}
+\label{sec:conclusions}
 Through turning models inside out and persisting their change history, this paper proposes change-based model as an approach to enable high-performance incremental model processing in collaborative development settings. The proposed approach has the potential to deliver step-change performance benefits (e.g. faster model persistence, comparison, and merging) in incremental model processing, which has the potential to enable analytics of models (e.g. trace and replay model history, develop insight how modelling tools used). Several future works also have been defined to tackle the identified challenges in realising the change-based model. Comparative evaluation will be conducted to assess the benefits and limitation of our approaches by comparing them to existing algorithms, tools, or baselines that they seek to improve.
 
 \subsubsection*{Acknowledgments.} This work is part of a scholarship managed by \emph{Lembaga Pengelola Dana Pendidikan Indonesia} (Indonesia Endowment Fund for Education).
