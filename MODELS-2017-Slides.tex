@@ -82,6 +82,7 @@ York, United Kingdom\\
 \frame{\titlepage}
 
 \begin{frame}
+\section{Introduction}
 \frametitle{Introduction}
 \begin{itemize}
     \item Model-based software engineering in the context of large and complex systems demands ability to process large models.
@@ -95,6 +96,7 @@ York, United Kingdom\\
 \end{frame}
   
 \begin{frame}
+\section{Our Aim}
 \frametitle{Our Aim}
 \begin{itemize}
 \item We aims at enabling flexible and high-performance incremental model processing through change-based model persistence.
@@ -104,6 +106,7 @@ York, United Kingdom\\
 \end{frame}
 
 \begin{frame}
+\section{An Example of Change-based Techniques (1)}
 \frametitle{An Example of Change-based Techniques (1)}
 \label{sec:An example_of_change-based_techniques_1}
 \framesubtitle{Report Generation Optimisation of an Organisational Chart Model}
@@ -124,6 +127,7 @@ York, United Kingdom\\
 
 
 \begin{frame}
+\section{An Example of Change-based Techniques (2)}
 \frametitle{An Example of Change-based Techniques (2)}
 \label{sec:An example_of_change-based_techniques_2}
 \framesubtitle{Report Generation Optimisation of an Organisational Chart Model}
@@ -147,6 +151,7 @@ York, United Kingdom\\
 \end{frame}
 
 \begin{frame}
+\section{An Example of Change-based Techniques (3)}
 \frametitle{An Example of Change-based Techniques (3)}
 \label{sec:An example_of_change-based_techniques_3}
 \framesubtitle{Report Generation Optimisation of an Organisational Chart Model}
@@ -167,6 +172,7 @@ Non-incremental execution can become a significant bottleneck for large evolving
 \end{frame}
 
 \begin{frame}
+\section{Requirements for Incremental Engine}
 \frametitle{Requirements for Incremental Engine}
 As demonstrated by Egyed \cite{egyed2011automatically}, to achieve incremental re-execution of (deterministic) queries on structured models, an execution engine needs to:
 \begin{enumerate}
@@ -177,7 +183,8 @@ As demonstrated by Egyed \cite{egyed2011automatically}, to achieve incremental r
 \end{frame}
 
 \begin{frame}
-\frametitle{ Identifying Changes in Models}
+\section{Identifying Changes in Models}
+\frametitle{Identifying Changes in Models}
 Two approaches for identifying changes in models to enable incremental model processing.
 \begin{itemize}
 \item \textbf{Notifications}. The engine listens to the notification facility of a modelling tool and receives notifications as soon as the model is modified (add a new employee). 
@@ -197,6 +204,7 @@ development with different roles and responsibility of developers.
 \end{frame}
 
 \begin{frame}[fragile]
+\section{A State-Based Representation}
 \frametitle{A State-Based Representation}
 A state-based representation of the model of Fig. \ref{fig:modified_chart} in XMI.
 \begin{lstlisting}[style=xmi,label=lst:xmimodel]
@@ -209,6 +217,7 @@ A state-based representation of the model of Fig. \ref{fig:modified_chart} in XM
 \end{frame}
 
 \begin{frame}[fragile]
+\section{A Change-based Persistence Representation}
 \frametitle{A Change-based Persistence Representation}
 A change-based representation of the model of Fig. \ref{fig:modified_chart}.
 \begin{lstlisting}[style=xml,label=lst:cbpmodel]
@@ -236,6 +245,7 @@ A change-based representation of the model of Fig. \ref{fig:modified_chart}.
 \end{frame}
 
 \begin{frame}
+\section{Prototype Implementation}
 \frametitle{Prototype Implementation}
 \begin{itemize}
 \item We have implemented a prototype. The prototype is available under \url{https://github.com/epsilonlabs/emf-cbp}.
@@ -249,6 +259,7 @@ A change-based representation of the model of Fig. \ref{fig:modified_chart}.
 \end{frame}
 
 \begin{frame}
+\section{Event Classes to Represent Changes of Models}
 \frametitle{Event Classes to Represent Changes of Models}
 \begin{figure}[htbh]
 \centering
@@ -259,6 +270,7 @@ A change-based representation of the model of Fig. \ref{fig:modified_chart}.
 \end{frame}
 
 \begin{frame}[fragile]
+\section{Java Code to Handle Notifications}
 \frametitle{Java Code to Handle Notifications}
 Simplified Java code to handle notification events.
 \begin{lstlisting}[style=java,label=lst:javacode]
@@ -284,7 +296,8 @@ public void notifyChanged(Notification n) {
 
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}
+\section{Factory, resources, and ChangeEventAdapter classes}
 \frametitle{Factory, resources, and ChangeEventAdapter classes}
 \begin{figure}[th]
 \includegraphics[scale=0.4]{resources}
@@ -294,6 +307,7 @@ public void notifyChanged(Notification n) {
 
 
 \begin{frame}
+\section{Benefits and Novel Capabilities}
 \frametitle{Benefits and Novel Capabilities}
 \begin{itemize}
 \item \textbf{Tool Support}. With appropriate tool support, modellers will be able to ``replay" the change history of a model (e.g. to understand design decisions made by other developers). 
@@ -304,6 +318,7 @@ public void notifyChanged(Notification n) {
 \end{frame}
 
 \begin{frame}
+\section{Challenges and Future Work}
 \frametitle{Challenges and Future Work}
 \begin{itemize}
 \item \textbf{Loading Overhead}. Loading models into memory by naively replaying the entire change history has a significant overhead. To address it, we will develop dedicated algorithms and data structures that will reduce the cost of the loading (e.g. ignoring events that are later overridden or cancelled out by other events). 
@@ -314,6 +329,7 @@ public void notifyChanged(Notification n) {
 
 
 \begin{frame}
+\section{Evaluations}
 \frametitle{Evaluations}
 \begin{itemize}
 \item \textbf{Vs Existing Algorithms/Tools}. Evaluation where there are existing approaches that the algorithms and tools developed in this research seek to outperform (e.g. change-based incremental validation vs. state-based incremental validation), comparative evaluation will be conducted to assess the benefits and limitations of our approaches. 
@@ -322,6 +338,7 @@ public void notifyChanged(Notification n) {
 \end{frame}
 
 \begin{frame}
+\section{Conclusions}
 \frametitle{Conclusions}
 \begin{itemize}
 \item This research aims at enabling high-performance incremental model processing in collaborative development settings through turning models inside out and persisting their change history.
@@ -331,6 +348,7 @@ public void notifyChanged(Notification n) {
 \end{frame}
 
 \begin{frame}
+\section{References}
 \frametitle{References}
 \scriptsize
 \bibliographystyle{IEEEtran}
