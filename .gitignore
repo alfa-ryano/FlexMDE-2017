@@ -67,3 +67,7 @@ llncs2e/llncs.doc
 llncs2e/history.txt
 llncs2e/llncsdoc.pdf
 FlexMDE-2017.pdf
+*.nav
+*.snm
+*.toc
+*.vrb
