@@ -79,6 +79,7 @@
     	float=t
 	}
 	\lstdefinestyle{ocl}{
+	    basicstyle=\ttfamily\small,
   		emph={
         	context, inv
     	}
@@ -91,13 +92,13 @@
     	}
 	}
 	\lstdefinestyle{xmi}{
-		basicstyle=\ttfamily\scriptsize,
+		basicstyle=\ttfamily\footnotesize,
   		emph={
         	Employee, manages
     	}
 	}
 	\lstdefinestyle{xml}{
-	    basicstyle=\ttfamily\scriptsize,
+	    basicstyle=\ttfamily\footnotesize,
   		emph={
         	register, create, add, to, resource,
         	from, eattribute, remove, ereference,
@@ -587,13 +588,13 @@ We have implemented a prototype\footnote{The prototype is available under \url{h
 
 Since not all change events are relevant to change-based persistence (e.g. EMF also produces change notifications when listeners are added/removed from the model), we have defined a set of event classes to represent events of interest. The event classes are depicted in Fig. \ref{fig:events} as subclasses of the \emph{ChangeEvent} abstract class.  %In Fig. \ref{events}, unlike other event classes,\emph{RegisterEPackageEvent} class has a reference to \emph{ChangeEventAdapater} class since the \emph{RegisterEPackageEvent} holds the information of \emph{EPackage}'s name (List. \ref{cbpmodel1}, line 3) required by the \emph{ChangeEventAdapter} to recreate a model in a de-serialisation process. 
 
-\begin{figure}[htbh]
+\begin{figure*}[htbh]
 \centering
 \includegraphics[width=\linewidth]{events}
 \caption{Event classes to represent changes of models.}
 %\dk{It would be useful to redraw the diagram so that important properties are visible (e.g. an AddToEReference event has an ``index'' and a ``value'') and also to discuss events - particularly those that may not immediately make sense to the reader (e.g. AddToResourceEvent, RegisterEPackageEvent)}
 \label{fig:events}
-\end{figure}
+\end{figure*}
 
 The \emph{ChangeEvent} class has a mutli-valued \emph{values} attribute which can accommodate both single-valued (e.g. set/add) or mutli-valued events (e.g. addAll/removeAll). \emph{ChangeEvent} can also accommodate different types of values, such as \emph{EObject}s for \emph{EReferenceEvents}, and primitive values (e.g. Integer, String) for \emph{EAttributeEvents}. The \emph{ChangeEvent} class also has a position attribute to hold the  index of an \emph{EObject} or a literal when they are added to a \emph{Resource}, \emph{EReference}, or \emph{EAttribute} with multiple values (Lst. \ref{lst:cbpmodel}, line 3, 6, 9, 12, 14, 17, 20). 
 
@@ -633,7 +634,7 @@ To integrate seamlessly with the EMF framework and to eventually support multipl
 
 \begin{figure}[th]
 \centering
-\includegraphics[scale=0.32]{resources}
+\includegraphics[width=\linewidth]{resources}
 \caption{Factory, resources, and ChangeEventAdapter classes.}
 %\dk{See previous comment on redrawing. In its current form the diagram can be interpreted as stating that a CBPXMLResourceFactory ``has a'' CBPXMLResourceImpl, which is incorrect.}
 \label{fig:resources}
